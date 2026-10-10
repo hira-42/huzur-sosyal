@@ -316,13 +316,21 @@ async function openHome() {
     btn.addEventListener("click", () => switchTab(btn.dataset.tab))
   );
 
-  await ensureProfile();
-  await loadData();
+await ensureProfile();
+await loadData();
 
-  $("greeting").textContent = displayName() + " 🌿";
-  $("myAvatar").innerHTML = avatarHTML(currentUser.id);
+const adminProfile = profiles[currentUser.id];
 
-  renderTab();
+if (adminProfile && adminProfile.is_admin === true) {
+  currentTab = "admin";
+} else {
+  currentTab = "home";
+}
+
+$("greeting").textContent = displayName() + " 🌿";
+$("myAvatar").innerHTML = avatarHTML(currentUser.id);
+
+renderTab();
 }
 
 function switchTab(tab) {
@@ -334,6 +342,11 @@ function switchTab(tab) {
 
   renderTab();
 }
+
+  if (currentTab === "admin") {
+    showAdminPanel();
+    return;
+  }
 
 function renderTab() {
   const target = $("tabContent");
@@ -1206,5 +1219,88 @@ async function showNotifications() {
       );
     }
   }
+}
+
+async function showAdminPanel() {
+  const target = $("tabContent");
+  if (!target) return;
+
+  const adminProfile = profiles[currentUser.id];
+
+  if (!adminProfile || adminProfile.is_admin !== true) {
+    currentTab = "home";
+    renderTab();
+    return;
+  }
+
+  target.innerHTML = `
+    <section class="panel">
+      <h2>🛡️ Huzur Yönetim Paneli</h2>
+      <p class="muted">Hoş geldin yönetici!</p>
+
+      <div class="topline">
+        <div>
+          <strong>${Object.keys(profiles).length}</strong>
+          <div class="muted">Kullanıcı</div>
+        </div>
+        <div>
+          <strong>${allPosts.length}</strong>
+          <div class="muted">Paylaşım</div>
+        </div>
+        <div>
+          <strong>${allComments.length}</strong>
+          <div class="muted">Yorum</div>
+        </div>
+      </div>
+
+      <button class="soft" id="adminRefresh"
+        style="width:100%;margin-top:16px">
+        🔄 Verileri yenile
+      </button>
+
+      <button class="soft" id="adminBack"
+        style="width:100%;margin-top:8px">
+        ← Ana sayfaya dön
+      </button>
+    </section>
+
+    <section class="panel">
+      <h3>👥 Kullanıcılar</h3>
+      ${
+        Object.values(profiles).map(p => `
+          <div style="padding:10px 0;border-bottom:1px solid #ddd">
+            <strong>${safe(p.full_name || p.username || "İsimsiz kullanıcı")}</strong>
+            <div class="muted">@${safe(p.username || "kullanici")}</div>
+            <div class="muted">${p.is_admin ? "🛡️ Yönetici" : "Üye"}</div>
+          </div>
+        `).join("") || "<p>Henüz kullanıcı yok.</p>"
+      }
+    </section>
+
+    <section class="panel">
+      <h3>📝 Son paylaşımlar</h3>
+      ${
+        allPosts.slice(0, 20).map(post => `
+          <div style="padding:10px 0;border-bottom:1px solid #ddd">
+            <strong>${safe(post.title || "Başlıksız paylaşım")}</strong>
+            <p>${safe((post.body || "").slice(0, 180))}</p>
+            <div class="muted">Kullanıcı: ${safe(
+              profiles[post.user_id]?.username || "Bilinmiyor"
+            )}</div>
+          </div>
+        `).join("") || "<p>Henüz paylaşım yok.</p>"
+      }
+    </section>
+  `;
+
+  $("adminRefresh").addEventListener("click", async () => {
+    await loadData();
+    showAdminPanel();
+  });
+
+  $("adminBack").addEventListener("click", () => {
+    currentTab = "home";
+    renderTab();
+  });
 }
 
