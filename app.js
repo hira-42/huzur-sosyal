@@ -119,10 +119,15 @@ function showAuthScreen(screenId) {
 }
 
 
-document.querySelectorAll("[data-go]").forEach(button => {
-  button.addEventListener("click", () => showAuthScreen(button.dataset.go));
-});
+document.addEventListener("click", function(event) {
+  const button = event.target.closest("[data-go]");
+  if (!button) return;
 
+  event.preventDefault();
+
+  const screen = button.dataset.go;
+  showAuthScreen(screen);
+});
 document.querySelectorAll(".password-toggle").forEach(button => {
   button.addEventListener("click", () => {
     const input = button.parentElement.querySelector("input");
