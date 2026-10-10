@@ -646,7 +646,67 @@ function renderUserResults() {
     });
   });
 }
+function showFollowList(userId, type) {
+  const target = $("tabContent");
+  if (!target) return;
 
+  const list = type === "followers"
+    ? allFollows
+        .filter(f => f.following_id === userId)
+        .map(f => f.follower_id)
+    : allFollows
+        .filter(f => f.follower_id === userId)
+        .map(f => f.following_id);
+
+  const title = type === "followers" ? "Takipçiler" : "Takip Ettikleri";
+
+  target.innerHTML = `
+    <button class="soft" id="backFromFollowList">← Profile dön</button>
+
+    <section class="panel">
+      <h2>${title}</h2>
+
+      ${
+        list.length
+          ? list.map(id => {
+              const p = getProfile(id);
+
+              return `
+                <div class="topline"
+                     style="justify-content:flex-start;padding:12px 0;border-bottom:1px solid #edf1ed">
+
+                  ${avatarHTML(id)}
+
+                  <div style="flex:1;min-width:0">
+                    <strong>${safe(displayName(id))}</strong>
+                    <div class="muted">
+                      ${safe(p?.username ? "@" + p.username : "")}
+                    </div>
+                  </div>
+
+                  <button class="soft" data-list-profile="${safe(id)}">
+                    Profili aç
+                  </button>
+                </div>
+              `;
+            }).join("")
+          : `<div class="muted" style="padding:15px 0">
+              Henüz ${type === "followers" ? "takipçisi" : "takip ettiği kişi"} yok.
+            </div>`
+      }
+    </section>
+  `;
+
+  $("backFromFollowList").addEventListener("click", () => {
+    showOtherProfile(userId);
+  });
+
+  target.querySelectorAll("[data-list-profile]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      showOtherProfile(btn.dataset.listProfile);
+    });
+  });
+}
 function showOtherProfile(id) {
   const p = getProfile(id);
   const mine = allPosts.filter(post => post.user_id === id);
@@ -673,10 +733,15 @@ function showOtherProfile(id) {
 
       <div class="topline" style="text-align:center;margin:16px 0">
         <div><strong>${mine.length}</strong><div class="muted">Paylaşım</div></div>
-        <div><strong>${followers.length}</strong><div class="muted">Takipçi</div></div>
-        <div><strong>${following.length}</strong><div class="muted">Takip</div></div>
+        <div class="follow-stat" data-followers="${id}" style="cursor:pointer">
+  <strong>${followers.length}</strong>
+  <div class="muted">Takipçi</div>   
       </div>
-
+<div class="follow-stat" data-following="${id}" style="cursor:pointer">
+  <strong>${following.length}</strong>
+  <div class="muted">Takip</div>
+</div>
+</div>
       <button class="primary" id="followBtn">
         ${isFollowing ? "✓ Takip ediliyor" : "＋ Takip et"}
       </button>
@@ -687,6 +752,17 @@ function showOtherProfile(id) {
     <div id="postList"></div>`;
 
   $("backToDiscover").addEventListener("click", () => switchTab("discover"));
+  document.querySelectorAll("[data-followers]").forEach(el => {
+  el.addEventListener("click", () => {
+    showFollowList(el.dataset.followers, "followers");
+  });
+});
+
+document.querySelectorAll("[data-following]").forEach(el => {
+  el.addEventListener("click", () => {
+    showFollowList(el.dataset.following, "following");
+  });
+});
 
   $("followBtn").addEventListener("click", async () => {
     const button = $("followBtn");
