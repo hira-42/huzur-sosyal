@@ -663,7 +663,7 @@ if (result.error) {
 
 
 if (!existing) {
-  alert("Takip tamamlandı, bildirim gönderiliyor...");
+  alert("TEST: Bildirim koduna ulaşıldı!");
 
   const notification = await db.from("notifications").insert({
     recipient_id: targetId,
