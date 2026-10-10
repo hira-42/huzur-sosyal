@@ -898,7 +898,6 @@ async function createPost(event) {
           upsert: false,
           contentType: file.type
         });
-
       if (uploadError) {
         throw new Error("Görsel yüklenemedi: " + uploadError.message);
       }
@@ -946,3 +945,4 @@ async function createPost(event) {
     await openHome();
   }
 })();
+
