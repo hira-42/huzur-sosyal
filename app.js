@@ -661,7 +661,10 @@ if (result.error) {
   return;
 }
 
+
 if (!existing) {
+  alert("Takip tamamlandı, bildirim gönderiliyor...");
+
   const notification = await db.from("notifications").insert({
     recipient_id: targetId,
     actor_id: currentUser.id,
@@ -670,9 +673,13 @@ if (!existing) {
   });
 
   if (notification.error) {
-    console.error("Bildirim oluşturulamadı:", notification.error.message);
+    alert("Bildirim hatası: " + notification.error.message);
+    console.error("Bildirim hatası:", notification.error);
+  } else {
+    alert("Bildirim veritabanına kaydedildi!");
   }
-  } 
+}
+
 
       await loadData();
       renderUserResults();
