@@ -413,6 +413,26 @@ function renderTab() {
   </div>
 
 </div>
+
+        <button class="soft" id="openNotificationsBtn"
+          style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <span>🔔 Bildirimler</span>
+          <span style="display:flex;align-items:center;gap:8px">
+            ${
+              allNotifications.filter(n =>
+                n.recipient_id === currentUser.id && !n.read_at
+              ).length > 0
+                ? `<strong style="background:#dc3545;color:white;border-radius:50%;min-width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;padding:0 6px">
+                    ${allNotifications.filter(n =>
+                      n.recipient_id === currentUser.id && !n.read_at
+                    ).length}
+                  </strong>`
+                : ""
+            }
+            ›
+          </span>
+        </button>
+
         <button class="primary" id="editProfileBtn">✏️ Profilimi düzenle</button>
         <div id="editProfileArea"></div>
       </section>
@@ -421,6 +441,11 @@ function renderTab() {
       <div id="postList"></div>`;
 
     $("editProfileBtn").addEventListener("click", showProfileEditor);
+    
+    $("openNotificationsBtn").addEventListener("click", () => {
+      showNotifications();
+    });
+
     $("myFollowersStat").addEventListener("click", () => {
   showFollowList(currentUser.id, "followers");
 });
@@ -1101,4 +1126,85 @@ async function createPost(event) {
     await openHome();
   }
 })();
+
+async function showNotifications() {
+  const target = $("tabContent");
+  if (!target) return;
+
+  target.innerHTML = `
+    <button class="soft" id="backFromNotifications">
+      ← Profile dön
+    </button>
+    <section class="panel">
+      <h2>🔔 Bildirimler</h2>
+      <div class="muted">Bildirimler yükleniyor...</div>
+    </section>
+  `;
+
+  $("backFromNotifications").addEventListener("click", () => {
+    switchTab("profile");
+  });
+
+  const { data, error } = await db
+    .from("notifications")
+    .select("*")
+    .eq("recipient_id", currentUser.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    target.querySelector(".panel").innerHTML =
+      `<h2>🔔 Bildirimler</h2>
+       <p>Bildirimler yüklenemedi: ${safe(error.message)}</p>`;
+    return;
+  }
+
+  allNotifications = data || [];
+
+  const panel = target.querySelector(".panel");
+
+  if (!allNotifications.length) {
+    panel.innerHTML = `
+      <h2>🔔 Bildirimler</h2>
+      <p class="muted">Henüz bildirimin yok.</p>
+    `;
+    return;
+  }
+
+  panel.innerHTML = `
+    <h2>🔔 Bildirimler</h2>
+    ${allNotifications.map(n => `
+      <div class="topline"
+           style="justify-content:flex-start;padding:12px 0;border-bottom:1px solid #edf1ed">
+        <div style="flex:1">
+          <strong>${safe(n.type === "follow" ? "Yeni takipçi" : "Bildirim")}</strong>
+          <div>${safe(n.message || "Yeni bir bildirimin var.")}</div>
+          <div class="muted">${n.read_at ? "Okundu" : "Yeni"}</div>
+        </div>
+        ${!n.read_at ? '<span style="color:#dc3545">●</span>' : ""}
+      </div>
+    `).join("")}
+  `;
+
+  const unreadIds = allNotifications
+    .filter(n => !n.read_at)
+    .map(n => n.id);
+
+  if (unreadIds.length) {
+    const { error: updateError } = await db
+      .from("notifications")
+      .update({ read_at: new Date().toISOString() })
+      .in("id", unreadIds)
+      .eq("recipient_id", currentUser.id);
+
+    if (updateError) {
+      console.error("Bildirimler okundu yapılamadı:", updateError.message);
+    } else {
+      allNotifications = allNotifications.map(n =>
+        unreadIds.includes(n.id)
+          ? { ...n, read_at: new Date().toISOString() }
+          : n
+      );
+    }
+  }
+}
 
