@@ -609,6 +609,12 @@ function showOtherProfile(id) {
   const mine = allPosts.filter(post => post.user_id === id);
   const target = $("tabContent");
 
+  const followers = allFollows.filter(f => f.following_id === id);
+  const following = allFollows.filter(f => f.follower_id === id);
+  const isFollowing = allFollows.some(
+    f => f.follower_id === currentUser.id && f.following_id === id
+  );
+
   target.innerHTML = `
     <button class="soft" id="backToDiscover">← Keşfete dön</button>
     <section class="panel">
@@ -619,23 +625,68 @@ function showOtherProfile(id) {
           <div class="muted">${safe(p.username ? "@" + p.username : "")}</div>
         </div>
       </div>
+
       <p style="line-height:1.6">${safe(p.bio || "Bu kullanıcının biyografisi yok.")}</p>
-      <div class="muted">${mine.length} paylaşım</div>
+
+      <div class="topline" style="text-align:center;margin:16px 0">
+        <div><strong>${mine.length}</strong><div class="muted">Paylaşım</div></div>
+        <div><strong>${followers.length}</strong><div class="muted">Takipçi</div></div>
+        <div><strong>${following.length}</strong><div class="muted">Takip</div></div>
+      </div>
+
+      <button class="primary" id="followBtn">
+        ${isFollowing ? "✓ Takip ediliyor" : "＋ Takip et"}
+      </button>
+      <p id="followMessage" class="muted"></p>
     </section>
+
     <h2>Paylaşımları</h2>
     <div id="postList"></div>`;
 
   $("backToDiscover").addEventListener("click", () => switchTab("discover"));
-  renderPosts(mine);
-}
+
+  $("followBtn").addEventListener("click", async () => {
+    const button = $("followBtn");
+    button.disabled = true;
+
+    try {
+      if (isFollowing) {
+        const { error } = await db.from("follows")
+          .delete()
+          .eq("follower_id", currentUser.id)
+          .eq("following_id", id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await db.from("follows").insert({
+          follower_id: currentUser.id,
+          following_id: id
+        });
+
+        if (error) throw error;
+      }
+
+      await loadData();
+      showOtherProfile(id);
+    } catch (error) {
+      const message = $("followMessage");
+      if (message) message.textContent = "İşlem başarısız: " + error.message;
+      button.disabled = false;
+    }
+  });
+
 
 function renderPosts(source = null) {
   const list = $("postList");
   if (!list) return;
 
   const q = ($("searchInput")?.value || "").toLocaleLowerCase("tr-TR");
+
   const filtered = (source || allPosts).filter(p =>
-    [p.title, p.body, p.category].join(" ").toLocaleLowerCase("tr-TR").includes(q)
+    [p.title, p.body, p.category]
+      .join(" ")
+      .toLocaleLowerCase("tr-TR")
+      .includes(q)
   );
 
   list.innerHTML = filtered.length
@@ -644,6 +695,7 @@ function renderPosts(source = null) {
 
   attachSocialHandlers();
 }
+
 
 function postCard(post) {
   const p = getProfile(post.user_id);
