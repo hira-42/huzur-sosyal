@@ -321,7 +321,15 @@ await loadData();
 
 const adminProfile = profiles[currentUser.id];
 
-if (adminProfile && adminProfile.is_admin === true) {
+const { data: adminProfile, error: adminError } = await db
+  .from("profiles")
+  .select("is_admin")
+  .eq("id", currentUser.id)
+  .maybeSingle();
+
+console.log("Yönetici bilgisi:", adminProfile, adminError);
+
+if (adminProfile?.is_admin === true) {
   currentTab = "admin";
 } else {
   currentTab = "home";
