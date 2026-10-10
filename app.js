@@ -654,26 +654,25 @@ function renderUserResults() {
             following_id: targetId
           });
 
-      if (result.error) 
-      
-      if (!existing) {
-        const notification = await db.from("notifications").insert({
-          recipient_id: targetId,
-          actor_id: currentUser.id,
-          type: "follow",
-          message: `${displayName()} seni takip etmeye başladı.`
-        });
+  
+if (result.error) {
+  alert("Takip işlemi başarısız: " + result.error.message);
+  btn.disabled = false;
+  return;
+}
 
-        if (notification.error) {
-          console.error("Bildirim oluşturulamadı:", notification.error.message);
-        }
-      }
+if (!existing) {
+  const notification = await db.from("notifications").insert({
+    recipient_id: targetId,
+    actor_id: currentUser.id,
+    type: "follow",
+    message: `${displayName()} seni takip etmeye başladı.`
+  });
 
-      {
-        alert("Takip işlemi başarısız: " + result.error.message);
-        btn.disabled = false;
-        return;
-      }
+  if (notification.error) {
+    console.error("Bildirim oluşturulamadı:", notification.error.message);
+  }
+  } 
 
       await loadData();
       renderUserResults();
