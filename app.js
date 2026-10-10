@@ -3,7 +3,7 @@ const SUPABASE_URL = "https://axmululppuxdrxboebpn.supabase.co";
 const SUPABASE_KEY = "sb_publishable_VAso_EpxALJhrTgwZxolGw_jYkKcfDU";
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-
+let currentUser = null;
 let allPosts = [];
 let allLikes = [];
 let allComments = [];
@@ -214,12 +214,15 @@ async function ensureProfile() {
       avatar_url: null
     });
 
-    if (insertError)
-      
+ 
+    if (insertError) {
       console.error("Profil oluşturulamadı:", insertError.message);
+    }
   }
+}
 
 async function loadData() {
+
   const [p, l, c, pr, f, n] = await Promise.all([
     db.from("posts").select("*").order("created_at", { ascending: false }),
     db.from("likes").select("*"),
@@ -671,10 +674,14 @@ function showOtherProfile(id) {
     } catch (error) {
       const message = $("followMessage");
       if (message) message.textContent = "İşlem başarısız: " + error.message;
+  
+      
       button.disabled = false;
     }
   });
 
+  renderPosts(mine);
+}
 
 function renderPosts(source = null) {
   const list = $("postList");
