@@ -395,12 +395,24 @@ function renderTab() {
 
         <p style="line-height:1.6">${safe(p.bio || "Henüz biyografi eklenmemiş.")}</p>
 
-        <div class="topline" style="text-align:center;margin:16px 0">
-          <div><strong>${mine.length}</strong><div class="muted">Paylaşım</div></div>
-          <div><strong>${allLikes.filter(x => x.user_id === currentUser.id).length}</strong><div class="muted">Beğeni</div></div>
-          <div><strong>${allComments.filter(x => x.user_id === currentUser.id).length}</strong><div class="muted">Yorum</div></div>
-        </div>
+       <div class="topline" style="text-align:center;margin:16px 0">
 
+  <div>
+    <strong>${mine.length}</strong>
+    <div class="muted">Paylaşım</div>
+  </div>
+
+  <div class="follow-stat" id="myFollowersStat" style="cursor:pointer">
+    <strong>${allFollows.filter(f => f.following_id === currentUser.id).length}</strong>
+    <div class="muted">Takipçi</div>
+  </div>
+
+  <div class="follow-stat" id="myFollowingStat" style="cursor:pointer">
+    <strong>${allFollows.filter(f => f.follower_id === currentUser.id).length}</strong>
+    <div class="muted">Takip</div>
+  </div>
+
+</div>
         <button class="primary" id="editProfileBtn">✏️ Profilimi düzenle</button>
         <div id="editProfileArea"></div>
       </section>
@@ -409,6 +421,13 @@ function renderTab() {
       <div id="postList"></div>`;
 
     $("editProfileBtn").addEventListener("click", showProfileEditor);
+    $("myFollowersStat").addEventListener("click", () => {
+  showFollowList(currentUser.id, "followers");
+});
+
+$("myFollowingStat").addEventListener("click", () => {
+  showFollowList(currentUser.id, "following");
+});
     renderPosts(mine);
     return;
   }
