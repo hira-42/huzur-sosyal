@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+
+  <meta name="theme-color" content="#8d73c9" />
+  <meta
+    name="description"
+    content="İslami içerik paylaşım platformu"
+  />
+
+  <title>İslami Paylaşım Platformu</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <main class="page-shell">
+
+    <div class="sky-glow"></div>
+    <div class="cloud cloud-1"></div>
+    <div class="cloud cloud-2"></div>
+    <div class="field field-back"></div>
+    <div class="field field-front"></div>
+
+    <section
+      class="auth-card"
+      aria-label="Hesap işlemleri"
+    >
+
+      <div class="brand-mark" aria-hidden="true">
+        ☾
+      </div>
+
+      <p class="eyebrow">
+        İslami Paylaşım Platformu
+      </p>
+
+
+      <!-- ========================= -->
+      <!-- BAŞLANGIÇ EKRANI -->
+      <!-- ========================= -->
+
+      <div
+        class="screen active"
+        id="welcomeScreen"
+      >
+
+        <h1>
+          Hoş geldin
+        </h1>
+
+        <p class="subtitle">
+          İslami içerikleri keşfet, paylaş ve güzel bilgileri birlikte büyüt.
+        </p>
+
+        <div class="choice-list">
+
+          <button
+            class="choice-card"
+            type="button"
+            data-go="login"
+          >
+
+            <span class="choice-icon">
+              ↪
+            </span>
+
+            <span>
+              <strong>
+                Giriş yap
+              </strong>
+
+              <small>
+                Zaten bir hesabım var
+              </small>
+            </span>
+
+            <span class="arrow">
+              ›
+            </span>
+
+          </button>
+
+
+          <button
+            class="choice-card"
+            type="button"
+            data-go="register"
+          >
+
+            <span class="choice-icon">
+              ＋
+            </span>
+
+            <span>
+              <strong>
+                Kayıt ol
+              </strong>
+
+              <small>
+                Yeni bir hesap oluştur
+              </small>
+            </span>
+
+            <span class="arrow">
+              ›
+            </span>
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- ========================= -->
+      <!-- GİRİŞ EKRANI -->
+      <!-- ========================= -->
+
+      <div
+        class="screen"
+        id="loginScreen"
+      >
+
+        <button
+          class="back-button"
+          type="button"
+          data-go="welcome"
+        >
+          ← Geri
+        </button>
+
+        <h1>
+          Giriş yap
+        </h1>
+
+        <p class="subtitle">
+          Hesabına devam etmek için bilgilerini gir.
+        </p>
+
+
+        <form
+          id="loginForm"
+          novalidate
+        >
+
+          <!-- E-POSTA -->
+
+          <label for="loginEmail">
+            E-posta
+          </label>
+
+          <input
+            id="loginEmail"
+            name="email"
+            type="email"
+            autocomplete="email"
+            inputmode="email"
+            placeholder="ornek@mail.com"
+            maxlength="120"
+            required
+          />
+
+
+          <!-- ŞİFRE -->
+
+          <label for="loginPassword">
+            Şifre
+          </label>
+
+          <div class="password-wrap">
+
+            <input
+              id="loginPassword"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              placeholder="Şifren"
+              maxlength="64"
+              required
+            />
+
+            <button
+              type="button"
+              class="password-toggle"
+              data-target="loginPassword"
+              aria-label="Şifreyi göster"
+            >
+              ◉
+            </button>
+
+          </div>
+
+
+          <!-- BENİ HATIRLA -->
+
+          <label class="check-row">
+
+            <input
+              id="rememberMe"
+              type="checkbox"
+            />
+
+            <span>
+              Beni hatırla
+            </span>
+
+          </label>
+
+
+          <!-- HATA / BİLGİ -->
+
+          <p
+            class="form-message"
+            id="loginMessage"
+            role="alert"
+          ></p>
+
+
+          <button
+            class="primary-button"
+            type="submit"
+          >
+            Giriş yap
+          </button>
+
+        </form>
+
+
+        <p class="switch-text">
+
+          Hesabın yok mu?
+
+          <button
+            type="button"
+            data-go="register"
+          >
+            Kayıt ol
+          </button>
+
+        </p>
+
+      </div>
+
+
+      <!-- ========================= -->
+      <!-- KAYIT EKRANI -->
+      <!-- ========================= -->
+
+      <div
+        class="screen"
+        id="registerScreen"
+      >
+
+        <button
+          class="back-button"
+          type="button"
+          data-go="welcome"
+        >
+          ← Geri
+        </button>
+
+        <h1>
+          Kayıt ol
+        </h1>
+
+        <p class="subtitle">
+          Kendi sayfanı oluştur ve içeriklerini paylaş.
+        </p>
+
+
+        <form
+          id="registerForm"
+          novalidate
+        >
+
+
+          <!-- İSİM + SOYİSİM -->
+
+          <div class="two-col">
+
+            <div>
+
+              <label for="firstName">
+                İsim
+              </label>
+
+              <input
+                id="firstName"
+                name="firstName"
+                type="text"
+                autocomplete="given-name"
+                placeholder="İsim"
+                maxlength="40"
+                required
+              />
+
+            </div>
+
+
+            <div>
+
+              <label for="lastName">
+                Soyisim
+              </label>
+
+              <input
+                id="lastName"
+                name="lastName"
+                type="text"
+                autocomplete="family-name"
+                placeholder="Soyisim"
+                maxlength="40"
+                required
+              />
+
+            </div>
+
+          </div>
+
+
+          <!-- E-POSTA -->
+
+          <label for="registerEmail">
+            E-posta
+          </label>
+
+          <input
+            id="registerEmail"
+            name="email"
+            type="email"
+            autocomplete="email"
+            inputmode="email"
+            placeholder="ornek@mail.com"
+            maxlength="120"
+            required
+          />
+
+
+          <!-- TAKMA AD -->
+
+          <label for="registerUsername">
+            Takma ad
+          </label>
+
+          <input
+            id="registerUsername"
+            name="username"
+            type="text"
+            autocomplete="username"
+            placeholder="Örn. hira"
+            maxlength="30"
+            required
+          />
+
+          <small class="hint">
+            Profilinde görünecek ad. Boşluk kullanmadan yaz.
+          </small>
+
+
+          <!-- ŞİFRE -->
+
+          <label for="registerPassword">
+            Şifre
+          </label>
+
+          <div class="password-wrap">
+
+            <input
+              id="registerPassword"
+              name="password"
+              type="password"
+              autocomplete="new-password"
+              placeholder="En az 8 karakter"
+              minlength="8"
+              maxlength="64"
+              required
+            />
+
+            <button
+              type="button"
+              class="password-toggle"
+              data-target="registerPassword"
+              aria-label="Şifreyi göster"
+            >
+              ◉
+            </button>
+
+          </div>
+
+
+          <!-- ŞİFRE TEKRAR -->
+
+          <label for="registerPasswordAgain">
+            Şifre tekrar
+          </label>
+
+          <div class="password-wrap">
+
+            <input
+              id="registerPasswordAgain"
+              name="passwordAgain"
+              type="password"
+              autocomplete="new-password"
+              placeholder="Şifreni tekrar yaz"
+              minlength="8"
+              maxlength="64"
+              required
+            />
+
+            <button
+              type="button"
+              class="password-toggle"
+              data-target="registerPasswordAgain"
+              aria-label="Şifreyi göster"
+            >
+              ◉
+            </button>
+
+          </div>
+
+
+          <!-- MESAJ -->
+
+          <p
+            class="form-message"
+            id="registerMessage"
+            role="alert"
+          ></p>
+
+
+          <!-- KAYIT -->
+
+          <button
+            class="primary-button"
+            type="submit"
+          >
+            Hesap oluştur
+          </button>
+
+        </form>
+
+
+        <p class="switch-text">
+
+          Zaten hesabın var mı?
+
+          <button
+            type="button"
+            data-go="login"
+          >
+            Giriş yap
+          </button>
+
+        </p>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ================================= -->
+  <!-- SUPABASE -->
+  <!-- ================================= -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+
+  <!-- ================================= -->
+  <!-- KENDİ JAVASCRIPT DOSYAMIZ -->
+  <!-- ================================= -->
+
+  <script src="app.js"></script>
+
+</body>
+</html>
