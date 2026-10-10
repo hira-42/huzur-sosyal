@@ -316,24 +316,24 @@ async function openHome() {
     btn.addEventListener("click", () => switchTab(btn.dataset.tab))
   );
 
+
 await ensureProfile();
 await loadData();
 
-const adminProfile = profiles[currentUser.id];
-
-const { data: adminProfile, error: adminError } = await db
+const { data: adminData, error: adminError } = await db
   .from("profiles")
   .select("is_admin")
   .eq("id", currentUser.id)
   .maybeSingle();
 
-console.log("Yönetici bilgisi:", adminProfile, adminError);
+console.log("Yönetici bilgisi:", adminData, adminError);
 
-if (adminProfile?.is_admin === true) {
+if (adminData?.is_admin === true) {
   currentTab = "admin";
 } else {
   currentTab = "home";
 }
+
 
 $("greeting").textContent = displayName() + " 🌿";
 $("myAvatar").innerHTML = avatarHTML(currentUser.id);
