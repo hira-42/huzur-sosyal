@@ -346,8 +346,14 @@ function renderTab() {
           <label>İçerik</label>
           <textarea name="body" maxlength="5000" required placeholder="Paylaşmak istediğini yaz..."></textarea>
 
-          <label>Görsel bağlantısı (isteğe bağlı)</label>
+      
+          <label>Fotoğraf veya görsel yükle</label>
+          <input name="post_image" id="postImageFile" type="file" accept="image/*">
+          <div class="muted">Telefonundan veya bilgisayarından resim seçebilirsin. En fazla 10 MB.</div>
+
+          <label>Ya da görsel bağlantısı ekle (isteğe bağlı)</label>
           <input name="image_url" type="url" placeholder="https://...">
+
 
           <button class="primary" type="submit">Paylaş 🌙</button>
           <p id="postMessage"></p>
@@ -775,27 +781,92 @@ function attachSocialHandlers() {
   });
 }
 
+
 async function createPost(event) {
   event.preventDefault();
 
-  const values = new FormData(event.currentTarget);
-  const post = {
-    user_id: currentUser.id,
-    title: String(values.get("title") || "").trim(),
-    category: String(values.get("category") || "Genel"),
-    body: String(values.get("body") || "").trim(),
-    image_url: String(values.get("image_url") || "").trim() || null
-  };
+  const form = event.currentTarget;
+  const values = new FormData(form);
 
-  showMessage("postMessage", "Paylaşılıyor...", "success");
+  const title = String(values.get("title") || "").trim();
+  const category = String(values.get("category") || "Genel");
+  const body = String(values.get("body") || "").trim();
+  const file = form.elements.post_image?.files?.[0] || null;
 
-  const { error } = await db.from("posts").insert(post);
+  let image_url = String(values.get("image_url") || "").trim() || null;
 
-  if (error)
-    return showMessage("postMessage", "Paylaşılamadı: " + error.message);
+  if (!title || !body) {
+    return showMessage("postMessage", "Başlık ve içerik alanlarını doldur.");
+  }
 
-  await loadData();
-  switchTab("home");
+  if (file) {
+    if (!file.type.startsWith("image/")) {
+      return showMessage("postMessage", "Lütfen bir görsel dosyası seç.");
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      return showMessage("postMessage", "Görsel en fazla 10 MB olabilir.");
+    }
+  }
+
+  const submitButton = form.querySelector('button[type="submit"]');
+  if (submitButton) submitButton.disabled = true;
+
+  try {
+    if (file) {
+      showMessage("postMessage", "Görsel yükleniyor...", "success");
+
+      const extension =
+        (file.name.split(".").pop() || "jpg")
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, "") || "jpg";
+
+      const filePath = `${currentUser.id}/${Date.now()}.${extension}`;
+
+      const { error: uploadError } = await db.storage
+        .from("post-images")
+        .upload(filePath, file, {
+          upsert: false,
+          contentType: file.type
+        });
+
+      if (uploadError) {
+        throw new Error("Görsel yüklenemedi: " + uploadError.message);
+      }
+
+      const { data: publicData } = db.storage
+        .from("post-images")
+        .getPublicUrl(filePath);
+
+      image_url = publicData.publicUrl;
+    }
+
+    showMessage("postMessage", "Paylaşım kaydediliyor...", "success");
+
+    const { error } = await db.from("posts").insert({
+      user_id: currentUser.id,
+      title,
+      category,
+      body,
+      image_url
+    });
+
+    if (error) {
+      throw new Error("Paylaşım kaydedilemedi: " + error.message);
+    }
+
+    await loadData();
+    currentTab = "home";
+    renderTab();
+
+  } catch (error) {
+    showMessage(
+      "postMessage",
+      error.message || "Bir hata oluştu. Tekrar dene."
+    );
+
+    if (submitButton) submitButton.disabled = false;
+  }
 }
 
 (async function init() {
