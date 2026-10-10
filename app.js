@@ -1233,7 +1233,7 @@ async function showAdminPanel() {
   const target = $("tabContent");
   if (!target) return;
 
-  const adminProfile = profiles[currentUser.id];
+
 
   if (!adminProfile || adminProfile.is_admin !== true) {
     currentTab = "home";
