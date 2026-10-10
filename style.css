@@ -221,3 +221,16 @@ input::placeholder { color: #998fa9; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
 }
+
+/* Giriş ve kayıt ekranı düzeltmesi */
+.screen.active {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.screen.active input,
+.screen.active button,
+.screen.active label {
+  visibility: visible;
+}
