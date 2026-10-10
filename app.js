@@ -3,12 +3,15 @@ const SUPABASE_URL = "https://axmululppuxdrxboebpn.supabase.co";
 const SUPABASE_KEY = "sb_publishable_VAso_EpxALJhrTgwZxolGw_jYkKcfDU";
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let currentUser = null;
+
 let allPosts = [];
 let allLikes = [];
 let allComments = [];
+let allFollows = [];
+let allNotifications = [];
 let profiles = {};
 let currentTab = "home";
+
 
 const $ = id => document.getElementById(id);
 
@@ -212,26 +215,32 @@ async function ensureProfile() {
     });
 
     if (insertError)
+      
       console.error("Profil oluşturulamadı:", insertError.message);
   }
-}
 
 async function loadData() {
-  const [p, l, c, pr] = await Promise.all([
+  const [p, l, c, pr, f, n] = await Promise.all([
     db.from("posts").select("*").order("created_at", { ascending: false }),
     db.from("likes").select("*"),
     db.from("comments").select("*").order("created_at", { ascending: true }),
-    db.from("profiles").select("*")
+    db.from("profiles").select("*"),
+    db.from("follows").select("*"),
+    db.from("notifications").select("*").order("created_at", { ascending: false })
   ]);
 
-  if (p.error) console.error(p.error.message);
-  if (l.error) console.error(l.error.message);
-  if (c.error) console.error(c.error.message);
-  if (pr.error) console.error(pr.error.message);
+  if (p.error) console.error("Gönderiler:", p.error.message);
+  if (l.error) console.error("Beğeniler:", l.error.message);
+  if (c.error) console.error("Yorumlar:", c.error.message);
+  if (pr.error) console.error("Profiller:", pr.error.message);
+  if (f.error) console.error("Takipler:", f.error.message);
+  if (n.error) console.error("Bildirimler:", n.error.message);
 
   allPosts = p.data || [];
   allLikes = l.data || [];
   allComments = c.data || [];
+  allFollows = f.data || [];
+  allNotifications = n.data || [];
   profiles = {};
 
   (pr.data || []).forEach(profile => {
@@ -241,13 +250,14 @@ async function loadData() {
   if (currentUser && !profiles[currentUser.id]) {
     await ensureProfile();
 
-    const { data } = await db.from("profiles").select("*")
-      .eq("id", currentUser.id).maybeSingle();
+    const { data } = await db.from("profiles")
+      .select("*")
+      .eq("id", currentUser.id)
+      .maybeSingle();
 
     if (data) profiles[data.id] = data;
   }
 }
-
 async function openHome() {
   document.querySelector(".page-shell")?.style.setProperty("display", "none");
 
