@@ -3,6 +3,7 @@ const SUPABASE_URL = "https://axmululppuxdrxboebpn.supabase.co";
 const SUPABASE_KEY = "sb_publishable_VAso_EpxALJhrTgwZxolGw_jYkKcfDU";
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+
 let currentUser = null;
 let allPosts = [];
 let allLikes = [];
@@ -598,12 +599,51 @@ function renderUserResults() {
         <strong>${safe(p.full_name || (p.username ? "@" + p.username : "Huzur üyesi"))}</strong>
         <div class="muted">${safe(p.username ? "@" + p.username : "")}</div>
       </div>
-      <button class="soft" data-open-profile="${safe(p.id)}">Profili aç</button>
+      
+<button class="soft" data-follow-toggle="${safe(p.id)}">
+  ${allFollows.some(f =>
+    f.follower_id === currentUser.id &&
+    f.following_id === p.id
+  ) ? "Takibi bırak" : "＋ Takip et"}
+</button>
+<button class="soft" data-open-profile="${safe(p.id)}">Profili aç</button>
+
     </div>`).join("") :
     `<div class="muted" style="padding:10px 0">${q ? "Eşleşen kullanıcı bulunamadı." : "Kayıtlı diğer profiller burada görünür."}</div>`;
 
+ 
   target.querySelectorAll("[data-open-profile]").forEach(btn => {
     btn.addEventListener("click", () => showOtherProfile(btn.dataset.openProfile));
+  });
+
+  target.querySelectorAll("[data-follow-toggle]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const targetId = btn.dataset.followToggle;
+      btn.disabled = true;
+
+      const existing = allFollows.some(f =>
+        f.follower_id === currentUser.id &&
+        f.following_id === targetId
+      );
+
+      const result = existing
+        ? await db.from("follows").delete()
+            .eq("follower_id", currentUser.id)
+            .eq("following_id", targetId)
+        : await db.from("follows").insert({
+            follower_id: currentUser.id,
+            following_id: targetId
+          });
+
+      if (result.error) {
+        alert("Takip işlemi başarısız: " + result.error.message);
+        btn.disabled = false;
+        return;
+      }
+
+      await loadData();
+      renderUserResults();
+    });
   });
 }
 
