@@ -93,15 +93,31 @@ function showMessage(id, message, type = "error") {
     el.className = type;
   }
 }
-
 function showAuthScreen(screenId) {
   const shell = document.querySelector(".page-shell");
+
   if (shell) shell.style.display = "";
-  document.querySelectorAll("#welcomeScreen,#loginScreen,#registerScreen")
+
+  document
+    .querySelectorAll("#welcomeScreen, #loginScreen, #registerScreen")
     .forEach(el => el.classList.remove("active"));
-  $(screenId)?.classList.add("active");
-  $("homeApp")?.remove();
+
+  const screenMap = {
+    welcome: "welcomeScreen",
+    login: "loginScreen",
+    register: "registerScreen",
+    welcomeScreen: "welcomeScreen",
+    loginScreen: "loginScreen",
+    registerScreen: "registerScreen"
+  };
+
+  const target = document.getElementById(screenMap[screenId]);
+
+  if (target) target.classList.add("active");
+
+  document.getElementById("homeApp")?.remove();
 }
+
 
 document.querySelectorAll("[data-go]").forEach(button => {
   button.addEventListener("click", () => showAuthScreen(button.dataset.go));
